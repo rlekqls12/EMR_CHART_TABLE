@@ -1,0 +1,20 @@
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pageList {
+  margin: 0 5px;
+}
+
+.pageList span {
+  margin: 0 3px;
+  color: gray;
+  cursor: pointer;
+}
+
+.active {
+  color: black !important;
+  font-weight: bold;
+}

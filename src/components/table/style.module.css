@@ -1,0 +1,27 @@
+.table {
+  width: 100%;
+  border: 1px solid black;
+  border-collapse: collapse;
+}
+
+.table th,
+.table td {
+  border: 1px dashed black;
+}
+
+.table th {
+  cursor: pointer;
+  border-bottom: 1px solid black !important;
+}
+
+.table td {
+  border-top: none !important;
+  border-bottom: none !important;
+  border-left-color: gray !important;
+  border-right-color: gray !important;
+  text-align: center;
+}
+
+.table tbody tr:nth-child(2n - 1) td {
+  background-color: rgb(225, 225, 225);
+}

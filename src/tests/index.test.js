@@ -11,7 +11,7 @@ describe('<Index />', () => {
   it('renders div', () => {
     const wrapper = mount(<Index />);
 
-    const divElement = wrapper.find('div');
-    expect(divElement).toBeTruthy();
-  })
+    const tableElement = wrapper.find('table');
+    expect(tableElement).toBeTruthy();
+  });
 });

@@ -1,0 +1,24 @@
+.wrapper {
+  min-width: 720px;
+  padding: 10px;
+}
+
+.control {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 10px;
+}
+.control > * {
+  flex: 1;
+}
+
+.length {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.length input {
+  text-align: right;
+}
