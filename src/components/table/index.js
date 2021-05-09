@@ -1,11 +1,12 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import styles from './style.module.css';
 
-const Table = ({ head = [], data = [], baseSort = [undefined, false], onSort = (key, isDesc) => {}, baseFilter = {}, onFilter = (key, value) => {} }) => {
+const Table = ({ head = [], data = [], detailData = {}, selectKey = '', onSelect = (id) => {}, baseSort = [undefined, false], onSort = (key, isDesc) => {}, baseFilter = {}, onFilter = (key, value) => {} }) => {
   const memoSort = useMemo(() => baseSort, []);
   const memoFilter = useMemo(() => baseFilter, []);
   const [sortInfo, setSortInfo] = useState(() => memoSort);
   const [filterInfo, setFilterInfo] = useState(() => memoFilter);
+  const [selectedID, setSelectedID] = useState();
 
   // 정렬
   function sort(key) {
@@ -38,6 +39,11 @@ const Table = ({ head = [], data = [], baseSort = [undefined, false], onSort = (
 
     onFilter(key, value);
   }
+
+  // 컬럼 선택
+  useEffect(() => {
+    onSelect(selectedID);
+  }, [selectedID]);
 
   // 테이블 헤더 생성
   const headElement = useMemo(() => {
@@ -123,13 +129,17 @@ const Table = ({ head = [], data = [], baseSort = [undefined, false], onSort = (
 
   // 테이블 바디 생성
   const bodyElement = useMemo(() => {
-    return data.map((row, index0) => (
-      <tr key={index0}>
-        {head.map((obj, index1) => (
-          <td key={index1}>{row[obj.value].toString()}</td>
-        ))}
-      </tr>
-    ));
+    const { id, render } = detailData;
+    return data.map((row, index0) => {
+      (<>
+        <tr key={index0} onClick={() => setSelectedID(row[selectKey])}>
+          {head.map((obj, index1) => (
+            <td key={index1}>{row[obj.value].toString()}</td>
+          ))}
+        </tr>
+        {row[selectKey] === id && render}
+      </>)
+    });
   }, [data]);
 
   return (

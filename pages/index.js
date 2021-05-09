@@ -83,7 +83,7 @@ const randomColor = Array.from({ length: 10 }, (_, i) => {
   return '#' + randomFF() + randomFF() + randomFF();
 });
 
-const Index = ({ data = [], chart = [] }) => {
+const Index = ({ data = [], chart = [], brief = {} }) => {
   // nextjs router 객체
   const router = useRouter();
   // url query 값
@@ -94,6 +94,16 @@ const Index = ({ data = [], chart = [] }) => {
   const [rows, setRows] = useState(query?.length ?? baseDataRows)
   // 최대 Page 값
   const maxPage = useMemo(() => Math.ceil((data?.totalLength ?? 0) / rows), [rows, data?.totalLength]);
+  // 환자 상세 정보 값
+  const briefData = useMemo(() => {
+    return {
+      id: brief?.personId,
+      render: <tr><td colSpan={7}>
+        <span>전체 방문 수 : </span>{brief?.visitCount}
+        <span>진단 정보 : </span>{brief?.conditionList?.map(text => <span>{text}</span>)?.join(<br />)}
+      </td></tr>
+    };
+  }, brief);
 
   // 초기 정렬 값
   const baseSort = useMemo(() => [query?.order_column, query?.order_desc == 'true'], []);
@@ -158,8 +168,18 @@ const Index = ({ data = [], chart = [] }) => {
   // 컬럼 필터 감시
   function onFilter(key, value) {
     if (!key) return;
+
     if (!value) delete query[key];
     else query[key] = value;
+
+    dataUpdate();
+  }
+
+  // 환자 선택 감시
+  function onSelect(id) {
+    if (!id) delete query.person_id;
+    else query.person_id = id;
+    
     dataUpdate();
   }
 
@@ -196,7 +216,16 @@ const Index = ({ data = [], chart = [] }) => {
       <hr />
       <br />
       <b>EMR 테이블</b>
-      <Table head={patientHeadList} data={data?.list} baseSort={baseSort} onSort={onSort} baseFilter={baseFilter} onFilter={onFilter}/>
+      <Table
+        head={patientHeadList}
+        data={data?.list}
+        detailData={briefData}
+        selectKey={'personID'}
+        onSelect={onSelect}
+        baseSort={baseSort}
+        onSort={onSort}
+        baseFilter={baseFilter}
+        onFilter={onFilter} />
       <div className={styles.control}>
         <div></div>
         <Pagination initialPage={page} maxPage={maxPage} showPageList={basePaginationShow} onPageChange={(page) => updatePage(page)}/>
@@ -210,7 +239,7 @@ const Index = ({ data = [], chart = [] }) => {
 
 // Server Side Rendering, 서버단에서 데이터 통신 후 클라이언트에 데이터 전송
 export async function getServerSideProps(context) {
-  const { page, length, order_column, order_desc, gender, race, ethnicity } = context.query;
+  const { page, length, order_column, order_desc, gender, race, ethnicity, person_id } = context.query;
 
   if (page < 1) context.query.page = 1;
   if (length < 1) context.query.length = 1;
@@ -230,7 +259,9 @@ export async function getServerSideProps(context) {
     return true;
   });
 
-  return { props: { data: patientList, chart: chartList } };
+  const patientBrief = await EMRApi.getPatientBrief(person_id);
+
+  return { props: { data: patientList, chart: chartList, brief: patientBrief } };
 }
 
 export default Index;
