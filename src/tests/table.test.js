@@ -44,19 +44,55 @@ describe('<Table />', () => {
 
     const wrapper = mount(<Table head={tempHeadList} data={tempData} onSort={onSort}/>);
     
+    // const thElement = wrapper.findWhere(node =>
+    //   node.type() === 'th' && node.text() === 'header'
+    // );
     const thElement = wrapper.find('th');
     expect(thElement.exists()).toBeTruthy();
 
-    thElement.simulate('click');
+    thElement.at(0).simulate('click');
     expect(sortKey).toBe('header');
     expect(sortDesc).toBe(false);
 
-    thElement.simulate('click');
+    thElement.at(0).simulate('click');
     expect(sortKey).toBe('header');
     expect(sortDesc).toBe(true);
 
-    thElement.simulate('click');
+    thElement.at(0).simulate('click');
     expect(sortKey).toBe(undefined);
     expect(sortDesc).toBe(false);
+  });
+
+  it('filter table', () => {
+    const tempHeadList = [{
+      text: '헤더', 
+      value: 'header', 
+      sort: 'header', 
+      filter: {
+        key: 'header',
+        type: 'text'
+      }
+    }];
+    const tempData = [{header: '테스트1'}, {header: '테스트2'}];
+    let filterKey = undefined;
+    let filterValue = undefined;
+    const onFilter = (key, value) => {
+      filterKey = key;
+      filterValue = value;
+    }
+
+    const wrapper = mount(<Table head={tempHeadList} data={tempData} onFilter={onFilter}/>);
+
+    const filterElement = wrapper.find('input');
+    expect(filterElement.exists()).toBeTruthy();
+
+    filterElement.simulate('change', {
+      target: {
+        value: '테스트'
+      }
+    });
+    filterElement.simulate('keydown', { key: 'Enter' });
+    expect(filterKey).toBe('header');
+    expect(filterValue).toBe('테스트');
   });
 });

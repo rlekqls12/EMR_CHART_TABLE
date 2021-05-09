@@ -9,12 +9,14 @@ const axios = Axios.create({
 
 export default {
   async getPatientList(parameter) {
-    const res = await axios.get(GET_PATIENT_LIST, { params: parameter });
-  
-    let patientList = { list: [], page: 1, totalLength: 0 };
-    if (res.status === 200 && res.data.patient) {
-      patientList = res.data.patient;
-    }
+    let patientList = { list: [], page: 1, totalLength: 1 };
+    try {
+      const res = await axios.get(GET_PATIENT_LIST, { params: parameter });
+
+      if (res.status === 200 && res.data.patient) {
+        patientList = res.data.patient;
+      }
+    } catch (e) {}    
   
     return patientList;
   }

@@ -7,13 +7,64 @@ import Pagination from 'src/components/pagination';
 
 // 테이블 헤더
 const patientHeadList = [
-  {text: '환자 ID', value: 'personID', sort: 'person_id'},
-  {text: '성별', value: 'gender', sort: 'gender'},
-  {text: '생년월일', value: 'birthDatetime', sort: 'birth'},
-  {text: '나이', value: 'age', sort: undefined},
-  {text: '인종', value: 'race', sort: 'race'},
-  {text: '민족', value: 'ethnicity', sort: 'ethnicity'},
-  {text: '사망 여부', value: 'isDeath', sort: 'death'},
+  {
+    text: '환자 ID',
+    value: 'personID',
+    sort: 'person_id',
+    filter: undefined
+  },
+  {
+    text: '성별',
+    value: 'gender',
+    sort: 'gender',
+    filter: {
+      key: 'gender',
+      type: 'text'
+    }
+  },
+  {
+    text: '생년월일', 
+    value: 'birthDatetime', 
+    sort: 'birth', 
+    filter: undefined
+  },
+  {
+    text: '나이', 
+    value: 'age', 
+    sort: undefined, 
+    filter: {
+      key: 'age',
+      type: 'range',
+      range: ['_min', '_max']
+    }
+  },
+  {
+    text: '인종', 
+    value: 'race', 
+    sort: 'race', 
+    filter: {
+      key: 'race',
+      type: 'text'
+    }
+  },
+  {
+    text: '민족', 
+    value: 'ethnicity', 
+    sort: 'ethnicity', 
+    filter: {
+      key: 'ethnicity',
+      type: 'text'
+    }
+  },
+  {
+    text: '사망 여부', 
+    value: 'isDeath', 
+    sort: 'death', 
+    filter: {
+      key: 'death',
+      type: 'switch'
+    }
+  },
 ];
 
 // 서버에서 가져오는 기본 데이터 Row 개수
@@ -33,6 +84,12 @@ const Index = ({ data }) => {
   const [rows, setRows] = useState(query?.length ?? baseDataRows)
   // 최대 Page 값
   const maxPage = useMemo(() => Math.ceil((data?.totalLength ?? 0) / rows), [rows, data?.totalLength]);
+
+  // 초기 정렬 값
+  const baseSort = useMemo(() => [query?.order_column, query?.order_desc == 'true'], []);
+
+  // 초기 필터 값
+  const baseFilter = useMemo(() => query, []);
 
   // Table Data 업데이트
   function dataUpdate() {
@@ -62,6 +119,14 @@ const Index = ({ data }) => {
     dataUpdate();
   }
 
+  // 컬럼 필터 감시
+  function onFilter(key, value) {
+    if (!key) return;
+    if (!value) delete query[key];
+    else query[key] = value;
+    dataUpdate();
+  }
+
   // Page 값 업데이트 함수
   function updatePage(page) {
     // page 값이 숫자인지 확인
@@ -83,7 +148,7 @@ const Index = ({ data }) => {
 
   return (
     <div className={styles.wrapper}>
-      <Table head={patientHeadList} data={data?.list} onSort={onSort}/>
+      <Table head={patientHeadList} data={data?.list} baseSort={baseSort} onSort={onSort} baseFilter={baseFilter} onFilter={onFilter}/>
       <div className={styles.control}>
         <div></div>
         <Pagination initialPage={page} maxPage={maxPage} showPageList={basePaginationShow} onPageChange={(page) => updatePage(page)}/>
