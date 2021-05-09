@@ -1,0 +1,12 @@
+.wrapper {
+  margin: 5px;
+  padding: 5px;
+  border: 1px solid black;
+}
+
+.wrapper span {
+  display: block;
+  width: 100%;
+  font-weight: bold;
+  text-align: center;
+}

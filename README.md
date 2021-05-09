@@ -4,7 +4,7 @@
 
 1. git clone https://github.com/rlekqls12/EMR_CHART_TABLE.git
 2. npm install 또는 yarn
-3. 최상단 경로에 .env.local 파일 생성 후 SERVER_URL에 서버 주소 입력
+3. 최상단 경로에 .env.local 파일 생성 후 SERVER_URL에 서버 주소 입력 (http://ip:port)
 4. npm run build 또는 yarn build
 5. npm start 또는 yarn start
 

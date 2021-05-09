@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import styles from './style.module.css';
 
 const Table = ({ head = [], data = [], baseSort = [undefined, false], onSort = (key, isDesc) => {}, baseFilter = {}, onFilter = (key, value) => {} }) => {

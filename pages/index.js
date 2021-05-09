@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/router';
 import EMRApi from 'src/api/emrApi';
 import styles from './index.module.css';
+import Chart from 'src/components/chart';
 import Table from 'src/components/table';
 import Pagination from 'src/components/pagination';
 
@@ -73,7 +74,16 @@ const baseDataRows = 30;
 // Pagination 표시 개수
 const basePaginationShow = 10;
 
-const Index = ({ data }) => {
+// Chart Color 랜덤 값
+const randomColor = Array.from({ length: 10 }, (_, i) => {
+  const randomFF = () => {
+    const FF = Math.floor(Math.random() * 255).toString(16);
+    return FF.length === 1 ? '0' + FF : FF;
+  }
+  return '#' + randomFF() + randomFF() + randomFF();
+});
+
+const Index = ({ data = [], chart = [] }) => {
   // nextjs router 객체
   const router = useRouter();
   // url query 값
@@ -87,9 +97,35 @@ const Index = ({ data }) => {
 
   // 초기 정렬 값
   const baseSort = useMemo(() => [query?.order_column, query?.order_desc == 'true'], []);
-
   // 초기 필터 값
   const baseFilter = useMemo(() => query, []);
+
+  // 차트 데이터 구분해주는 함수
+  function chartClassfication(keys) {
+    if (!chart) return [];
+
+    const tempChart = {};
+    chart.forEach(temp => {
+      let keyData;
+      if (Array.isArray(keys)) keyData = keys.map(key => temp[key]).join(' + ');
+      else keyData = temp[keys];
+
+      if (tempChart[keyData]) tempChart[keyData] += temp.count;
+      else tempChart[keyData] = temp.count;
+    });
+    return Object.entries(tempChart).map(v => ({ name: v[0], value: v[1] })).sort((a, b) => a.name === b.name ? 0 : (a.name < b.name ? -1 : 1));
+  }
+
+  // 차트 : 성별
+  const genderChart = useMemo(() => chartClassfication('gender'), [chart]);
+  // 차트 : 인종별
+  const raceChart = useMemo(() => chartClassfication('race'), [chart]);
+  // 차트 : 민족별
+  const ethnicityChart = useMemo(() => chartClassfication('ethnicity'), [chart]);
+  // 차트 : 성별 인종별
+  const genderRaceChart = useMemo(() => chartClassfication(['gender', 'race']), [chart]);
+  // 차트 : 성별 민족별
+  const genderEthnicityChart = useMemo(() => chartClassfication(['gender', 'ethnicity']), [chart]);
 
   // Table Data 업데이트
   function dataUpdate() {
@@ -148,6 +184,18 @@ const Index = ({ data }) => {
 
   return (
     <div className={styles.wrapper}>
+      <b>EMR 차트</b>
+      <div className={styles.chartWrap}>
+        <Chart name={"성별"} data={genderChart} colors={randomColor.slice(0, genderChart.length)} />
+        <Chart name={"인종별"} data={raceChart} colors={randomColor.slice(0, raceChart.length)} />
+        <Chart name={"민족별"} data={ethnicityChart} colors={randomColor.slice(0, ethnicityChart.length)} />
+        <Chart name={"성별 + 인종별"} data={genderRaceChart} colors={randomColor.slice(0, genderRaceChart.length)} />
+        <Chart name={"성별 + 민족별"} data={genderEthnicityChart} colors={randomColor.slice(0, genderEthnicityChart.length)} />
+      </div>
+      <br />
+      <hr />
+      <br />
+      <b>EMR 테이블</b>
       <Table head={patientHeadList} data={data?.list} baseSort={baseSort} onSort={onSort} baseFilter={baseFilter} onFilter={onFilter}/>
       <div className={styles.control}>
         <div></div>
@@ -162,7 +210,7 @@ const Index = ({ data }) => {
 
 // Server Side Rendering, 서버단에서 데이터 통신 후 클라이언트에 데이터 전송
 export async function getServerSideProps(context) {
-  const { page, length, order_column, order_desc } = context.query;
+  const { page, length, order_column, order_desc, gender, race, ethnicity } = context.query;
 
   if (page < 1) context.query.page = 1;
   if (length < 1) context.query.length = 1;
@@ -171,9 +219,18 @@ export async function getServerSideProps(context) {
     delete context.query.order_desc;
   }
 
-  let patientList = await EMRApi.getPatientList(context.query);
+  const patientList = await EMRApi.getPatientList(context.query);
 
-  return { props: { data: patientList } };
+  let chartList = await EMRApi.getChartList();
+  chartList = chartList.filter((chart) => {
+    if (gender) return chart.gender === gender;
+    if (race) return chart.race === race;
+    if (ethnicity) return chart.ethnicity === ethnicity;
+
+    return true;
+  });
+
+  return { props: { data: patientList, chart: chartList } };
 }
 
 export default Index;

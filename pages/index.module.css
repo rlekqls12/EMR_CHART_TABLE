@@ -3,12 +3,22 @@
   padding: 10px;
 }
 
+.chartWrap {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  margin-bottom: 10px;
+}
+
 .control {
   display: flex;
   align-items: center;
   justify-content: center;
   margin-top: 10px;
 }
+
 .control > * {
   flex: 1;
 }
