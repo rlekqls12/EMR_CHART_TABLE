@@ -130,16 +130,17 @@ const Table = ({ head = [], data = [], detailData = {}, selectKey = '', onSelect
   // 테이블 바디 생성
   const bodyElement = useMemo(() => {
     const { id, render } = detailData;
-    return data.map((row, index0) => {
-      (<>
-        <tr key={index0} onClick={() => setSelectedID(row[selectKey])}>
-          {head.map((obj, index1) => (
-            <td key={index1}>{row[obj.value].toString()}</td>
+
+    return data.map((row, idx0) => 
+      (<React.Fragment key={idx0}>
+        <tr onClick={() => setSelectedID(row[selectKey])}>
+          {head.map((obj, idx1) => (
+            <td key={idx1}>{row[obj.value].toString()}</td>
           ))}
         </tr>
-        {row[selectKey] === id && render}
-      </>)
-    });
+        {row[selectKey] == id && render}
+      </React.Fragment>)
+    );
   }, [data]);
 
   return (

@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/router';
 import EMRApi from 'src/api/emrApi';
 import styles from './index.module.css';
@@ -96,14 +96,35 @@ const Index = ({ data = [], chart = [], brief = {} }) => {
   const maxPage = useMemo(() => Math.ceil((data?.totalLength ?? 0) / rows), [rows, data?.totalLength]);
   // 환자 상세 정보 값
   const briefData = useMemo(() => {
+    const briefCountRaw = {};
+    
+    brief?.conditionList?.forEach(text => {
+      if (briefCountRaw[text]) briefCountRaw[text]++;
+      else briefCountRaw[text] = 1;
+    });
+
+    const briefCountList = Object.entries(briefCountRaw).sort(([t1], [t2]) => {
+      if (t1 === 2) return 0;
+      else return t1 < t2 ? -1 : 1;
+    });
+
     return {
       id: brief?.personId,
-      render: <tr><td colSpan={7}>
-        <span>전체 방문 수 : </span>{brief?.visitCount}
-        <span>진단 정보 : </span>{brief?.conditionList?.map(text => <span>{text}</span>)?.join(<br />)}
+      render: <tr><td colSpan={7} className={styles.detailPatient}>
+        <div>
+          <div>
+            <span>ID {brief?.personId}</span><br/>
+            <span><b>전체 방문 수</b></span>
+            <h1>{brief?.visitCount}</h1>
+          </div>
+          <ul>
+            <span><b>진단 정보</b></span>
+            {briefCountList.map(([text, count], index) => <li key={index}>{text} <b>{count}</b></li>)}
+          </ul>
+        </div>
       </td></tr>
     };
-  }, brief);
+  }, [brief]);
 
   // 초기 정렬 값
   const baseSort = useMemo(() => [query?.order_column, query?.order_desc == 'true'], []);
@@ -111,7 +132,7 @@ const Index = ({ data = [], chart = [], brief = {} }) => {
   const baseFilter = useMemo(() => query, []);
 
   // 차트 데이터 구분해주는 함수
-  function chartClassfication(keys) {
+  const chartClassfication = useCallback((keys) => {
     if (!chart) return [];
 
     const tempChart = {};
@@ -124,7 +145,7 @@ const Index = ({ data = [], chart = [], brief = {} }) => {
       else tempChart[keyData] = temp.count;
     });
     return Object.entries(tempChart).map(v => ({ name: v[0], value: v[1] })).sort((a, b) => a.name === b.name ? 0 : (a.name < b.name ? -1 : 1));
-  }
+  }, [chart]);
 
   // 차트 : 성별
   const genderChart = useMemo(() => chartClassfication('gender'), [chart]);
@@ -139,8 +160,14 @@ const Index = ({ data = [], chart = [], brief = {} }) => {
 
   // Table Data 업데이트
   function dataUpdate() {
-    const paramters = '/?' + Object.entries(query).map(v => v.join('=')).join('&');
-    router.push(paramters);
+    router.push(
+      {
+        pathname: router.pathname,
+        query: query,
+      },
+      undefined,
+      { scroll: false }
+    );
   }
 
   // Row 값 업데이트 감시

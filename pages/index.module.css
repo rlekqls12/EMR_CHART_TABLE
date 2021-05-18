@@ -12,6 +12,26 @@
   margin-bottom: 10px;
 }
 
+.detailPatient {
+  background-color: rgb(215, 250, 215) !important;
+}
+
+.detailPatient > div {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+}
+
+.detailPatient > div > div {
+  flex: 1;
+}
+
+.detailPatient > div > ul {
+  flex: 1;
+  text-align: left;
+}
+
 .control {
   display: flex;
   align-items: center;

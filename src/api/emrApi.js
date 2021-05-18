@@ -19,8 +19,6 @@ export default {
         patientList = res.data.patient;
       }
     } catch (e) {}
-
-    console.log('patientList', patientList);
   
     return patientList;
   },
@@ -33,24 +31,23 @@ export default {
         chartList = res.data.stats;
       }
     } catch (e) {}
-
-    console.log('chartList', chartList);
   
     return chartList;
   },
   async getPatientBrief(person_id) {
-    let data = { personId: person_id, conditionList: [], visitCount: 0 };
+    let data = { personId: null, conditionList: [], visitCount: 0 };
     if (!person_id) return data;
 
     try {
       const res = await axios.get(GET_PATIENT_BRIEF + person_id);
 
       if (res.status === 200 && res.data) {
-        data = res.data;
+        data = {
+          ...res.data,
+          personId: person_id
+        };
       }
     } catch (e) {}
-
-    console.log('data', data);
   
     return data;
   },
