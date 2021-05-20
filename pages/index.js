@@ -178,14 +178,16 @@ const Index = ({ data = [], chart = [], brief = {} }) => {
 
 	// Table Data 업데이트
 	function dataUpdate() {
-		router.push(
-			{
-				pathname: router.pathname,
-				query: query,
-			},
-			undefined,
-			{ scroll: false }
-		);
+		if (router) {
+      router.push(
+        {
+          pathname: router?.pathname,
+          query: query,
+        },
+        undefined,
+        { scroll: false }
+      );
+    }
 	}
 
 	// Row 값 업데이트 감시
